@@ -1,1 +1,49 @@
 
+name: GoRest API Tests
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  api-testing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Newman
+        run: npm install --global newman
+
+      - name: Validate Postman files
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('Collection.json', 'utf8'))"
+          node -e "JSON.parse(require('fs').readFileSync('Environment.json', 'utf8'))"
+          test -f users.csv
+
+      - name: Run Postman collection
+        env:
+          GOREST_TOKEN: ${{ secrets.GOREST_TOKEN }}
+        run: |
+          if [ -z "$GOREST_TOKEN" ]; then
+            echo "::error::Missing GOREST_TOKEN secret"
+            exit 1
+          fi
+
+          newman run Collection.json \
+            -e Environment.json \
+            -d users.csv \
+            --env-var "token=$GOREST_TOKEN" \
+            --reporters cli \
+            --suppress-exit-code
