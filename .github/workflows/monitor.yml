@@ -1,0 +1,32 @@
+name: GoRest API Monitor
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Newman
+        run: npm install --global newman
+
+      - name: Validate monitor collection JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('monitor.json', 'utf8')); console.log('monitor.json is valid JSON')"
+
+      - name: Run Postman monitor collection
+        run: newman run monitor.json --reporters cli
