@@ -1,0 +1,58 @@
+{
+  "info": {
+    "name": "2474802010446_LamQuocVuong_Monitor",
+    "description": "Monitor GoRest public users endpoint: HTTP 200, valid JSON, and warn when response time is 800ms or higher.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "GET /users - Status and Response Time",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test('Response time is measured', function () {",
+              "    pm.expect(pm.response.responseTime).to.be.a('number');",
+              "    if (pm.response.responseTime >= 800) {",
+              "        console.warn('WARNING: Response time is ' + pm.response.responseTime + 'ms (threshold: 800ms)');",
+              "    }",
+              "});",
+              "pm.test('Response is valid JSON', function () {",
+              "    pm.response.to.be.json;",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "url": {
+          "raw": "https://gorest.co.in/public/v2/users",
+          "protocol": "https",
+          "host": [
+            "gorest",
+            "co",
+            "in"
+          ],
+          "path": [
+            "public",
+            "v2",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
