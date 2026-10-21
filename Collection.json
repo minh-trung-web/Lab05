@@ -1,0 +1,492 @@
+{
+  "info": {
+    "_postman_id": "35d3386a-99f6-4621-9739-e8c8e0c445e0",
+    "name": "2474802016924_TranVoMinhTrung_GoRest",
+    "description": "Lab 05 - GoRest API Testing. Positive_Cases: create user with DDT (users.csv), get user, update status to inactive, delete user. Negative_Cases: missing token, duplicate email, get deleted user. Use a valid GoRest token through the token environment variable or GitHub Secret. Do not commit a real token.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58215765",
+    "_collection_link": "https://go.postman.co/collection/58215765-35d3386a-99f6-4621-9739-e8c8e0c445e0?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Positive_Cases",
+      "item": [
+        {
+          "name": "1. POST - Create User (DDT users.csv)",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const baseEmail = String(pm.iterationData.get('email'));",
+                  "const uniqueEmail = baseEmail.replace('@', '.' + Date.now() + '.' + pm.info.iteration + '@');",
+                  "",
+                  "pm.environment.set('runEmail', uniqueEmail);",
+                  "pm.environment.unset('userId');",
+                  "pm.environment.unset('createdEmail');",
+                  "pm.collectionVariables.unset('duplicateEmailForRun');"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 201 Created', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 201) {",
+                  "    const data = pm.response.json();",
+                  "    pm.collectionVariables.set('duplicateEmailForRun', data.email);",
+                  "    ",
+                  "",
+                  "    pm.environment.set('userId', String(data.id));",
+                  "    pm.environment.set('createdEmail', data.email);",
+                  "    pm.environment.set('runEmail', data.email);",
+                  "",
+                  "    pm.test('Response contains expected user data', function () {",
+                  "        pm.expect(data).to.have.property('id');",
+                  "        pm.expect(data.name).to.eql(pm.iterationData.get('name'));",
+                  "        pm.expect(data.email).to.eql(pm.environment.get('runEmail'));",
+                  "        pm.expect(data.status).to.eql('active');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"{{name}}\",\n    \"gender\": \"{{gender}}\",\n    \"email\": \"{{runEmail}}\",\n    \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "2. GET - Get Created User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "",
+                  "    pm.test('Returned user ID matches created user', function () {",
+                  "        pm.expect(String(data.id)).to.eql(",
+                  "            pm.environment.get('userId')",
+                  "        );",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "3. PATCH - Update User Status to Inactive",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 200 OK', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "if (pm.response.code === 200) {",
+                  "    const data = pm.response.json();",
+                  "",
+                  "    pm.test('User status is inactive', function () {",
+                  "        pm.expect(data.status).to.eql('inactive');",
+                  "    });",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"inactive\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "4. DELETE - Delete User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status code is 204 No Content', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "",
+                  "pm.test('Response body is empty', function () {",
+                  "    pm.expect(pm.response.text()).to.eql('');",
+                  "});",
+                  "",
+                  "if (pm.response.code === 204) {",
+                  "    pm.environment.set('deletedUserId', pm.environment.get('userId'));",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Negative_Cases",
+      "item": [
+        {
+          "name": "5. POST - Create User Without Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Request without token is rejected', function () {\r",
+                  "    pm.expect([401, 403]).to.include(pm.response.code);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Unauthorized User\",\n    \"gender\": \"male\",\n    \"email\": \"unauthorized.test.20261021@example.com\",\n    \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "6. POST - Create User With Duplicate Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Duplicate email is rejected with 422', function () {\r",
+                  "    pm.response.to.have.status(422);\r",
+                  "});\r",
+                  "\r",
+                  "if (pm.response.code === 422) {\r",
+                  "    const data = pm.response.json();\r",
+                  "\r",
+                  "    pm.test('Response confirms duplicate email', function () {\r",
+                  "        pm.expect(JSON.stringify(data)).to.include('email');\r",
+                  "        pm.expect(JSON.stringify(data)).to.include('has already been taken');\r",
+                  "    });\r",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Duplicate Email User\",\n    \"gender\": \"male\",\n    \"email\": \"{{duplicateEmailForRun}}\",\n    \"status\": \"active\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "7. GET - Get Deleted User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Deleted user returns 404 Not Found', function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://gorest.co.in/public/v2"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "createdEmail",
+      "value": ""
+    },
+    {
+      "key": "runEmail",
+      "value": ""
+    },
+    {
+      "key": "duplicateEmailForRun",
+      "value": ""
+    }
+  ]
+}
