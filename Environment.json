@@ -1,0 +1,34 @@
+{
+  "id": "2efedfe9-e815-404d-b85a-069987847947",
+  "name": "2474802010446_LamQuocVuong_GoRest_Env",
+  "values": [
+    {
+      "key": "token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "createdEmail",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "runEmail",
+      "value": "",
+      "type": "default",
+      "enabled": true
+    }
+  ],
+  "color": null,
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2026-10-21T10:15:43.506Z",
+  "_postman_exported_using": "Postman/12.31.7"
+}
